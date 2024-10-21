@@ -22,10 +22,15 @@ class StudentService(private val studentRepository: StudentRepository) {
     }
 
     fun saveStudent(student: Student): Student {
-        return studentRepository.save(student)
+        val studentRes = studentRepository.save(student)
+        return Student(studentRes.id, studentRes.firstName,
+            studentRes.lastName, studentRes.email, studentRes.classroom)
     }
 
     fun deleteStudentById(id: Long) {
+        if(!studentRepository.existsById(id)) {
+            throw IllegalArgumentException("Student with id $id not found")
+        }
         studentRepository.deleteById(id)
     }
 

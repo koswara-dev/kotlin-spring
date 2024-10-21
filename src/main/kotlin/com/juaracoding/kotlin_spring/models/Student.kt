@@ -20,4 +20,7 @@ data class Student(
     @ManyToOne
     @JoinColumn(name = "classroom_id")
     val classroom: Classroom
+
+    // TODO: input validation
+
 )
