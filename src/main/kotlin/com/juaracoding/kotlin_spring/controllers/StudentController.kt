@@ -2,6 +2,7 @@ package com.juaracoding.kotlin_spring.controllers
 
 import com.juaracoding.kotlin_spring.models.Student
 import com.juaracoding.kotlin_spring.service.StudentService
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -12,9 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.Optional
 
 @RestController()
 @RequestMapping("/api/students")
@@ -27,32 +26,33 @@ class StudentController(@Autowired private val studentService: StudentService) {
     fun getVersion(@RequestParam("version") version: Int) = "Kotlin Spring Boot 3 version: $version"*/
 
     @GetMapping
-    fun getAllStudents(): ResponseEntity<List<Student>> {
-        return ResponseEntity.ok(studentService.getAllStudents())
-    }
+    fun getAllStudents(): List<Student> = studentService.getAllStudents()
 
     @GetMapping("/{id}")
     fun getStudentById(@PathVariable id: Long): ResponseEntity<Student> {
-        return ResponseEntity.ok(studentService.getStudentById(id))
+        val student = studentService.getStudentById(id)
+        return if (student != null) ResponseEntity.ok(student) else ResponseEntity.notFound().build()
     }
 
     @PostMapping
-    fun createStudent(@RequestBody student: Student): ResponseEntity<Student> {
-        return ResponseEntity.status(HttpStatus.CREATED).body(studentService.saveStudent(student));
+    fun createStudent(@Valid @RequestBody student: Student): ResponseEntity<Student> {
+        val savedStudent = studentService.saveStudent(student)
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent)
     }
 
     @PutMapping("/{id}")
-    fun updateStudent(@PathVariable id: Long, @RequestBody student: Student): ResponseEntity<Student> {
-        return ResponseEntity.status(HttpStatus.OK).body(studentService.saveStudent(student));
+    fun updateStudent(@PathVariable id: Long, @Valid @RequestBody student: Student): ResponseEntity<Student> {
+        val updatedStudent = studentService.updateStudent(id, student)
+        return if (updatedStudent != null) ResponseEntity.ok(updatedStudent) else ResponseEntity.notFound().build()
     }
 
     @DeleteMapping("/{id}")
     fun deleteStudent(@PathVariable id: Long): ResponseEntity<Void> {
-        studentService.deleteStudentById(id)
+        studentService.deleteStudent(id)
         return ResponseEntity.noContent().build()
     }
 
-    // TODO: create, put, delete
+    // TODO: pageable, sorting, search
 
 
 }
